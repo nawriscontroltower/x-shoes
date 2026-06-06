@@ -439,7 +439,7 @@ const db = firebase.firestore();
 
 // ── STATE ──
 let products = [];
-let cart = JSON.parse(localStorage.getItem('xshoes_cart') || '[]');
+let cart = JSON.parse(sessionStorage.getItem('xshoes_cart') || '[]');
 let currentProduct = null;
 let storeSettings = { phone:'0920007485', showPrices:true };
 
@@ -597,16 +597,9 @@ function addToCart(p, size) {
 
 function saveCart() {
   try {
-    localStorage.setItem('xshoes_cart', JSON.stringify(cart));
+    sessionStorage.setItem('xshoes_cart', JSON.stringify(cart));
   } catch(e) {
-    // QuotaExceededError — free space then retry
-    try {
-      const keys = Object.keys(localStorage);
-      keys.forEach(k => { if (k !== 'xshoes_cart') localStorage.removeItem(k); });
-      localStorage.setItem('xshoes_cart', JSON.stringify(cart));
-    } catch(e2) {
-      console.warn('localStorage full — cart lives in memory only');
-    }
+    console.warn('sessionStorage unavailable — cart lives in memory only');
   }
 }
 
