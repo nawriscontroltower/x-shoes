@@ -195,8 +195,12 @@ footer { background:var(--gray-dark); border-top:1px solid var(--border); paddin
 .overlay.show { display:block; }
 
 /* TOAST */
-.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(70px); background:var(--brown); color:white; padding:13px 26px; font-weight:700; font-size:0.82rem; letter-spacing:1px; z-index:2000; transition:transform 0.35s ease; pointer-events:none; }
-.toast.show { transform:translateX(-50%) translateY(0); }
+.toast { position:fixed; top:80px; left:50%; transform:translateX(-50%) translateY(-20px); background:var(--brown); color:white; padding:14px 30px; font-weight:700; font-size:0.9rem; letter-spacing:1px; z-index:9999; transition:transform 0.3s ease, opacity 0.3s ease; pointer-events:none; border-radius:4px; box-shadow:0 8px 32px rgba(0,0,0,0.4); opacity:0; }
+.toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+/* CART COUNT POP */
+@keyframes cartPop { 0%{transform:scale(1)} 50%{transform:scale(1.7);background:var(--brown-light)} 100%{transform:scale(1)} }
+.cart-count.pop { animation:cartPop 0.4s ease; }
 
 /* REVEAL */
 .reveal { opacity:0; transform:translateY(30px); transition:opacity 0.7s ease,transform 0.7s ease; }
@@ -569,8 +573,12 @@ function addToCartFromModal() {
   const sizeBtn = document.querySelector('.size-btn.active');
   const size = sizeBtn ? sizeBtn.textContent : null;
   if (!size) { showToast('⚠️ اختر المقاس أولاً'); return; }
-  addToCart(currentProduct, size);
+  const product = currentProduct;
   closeModal();
+  setTimeout(() => {
+    addToCart(product, size);
+    showToast(`✅ تمت الإضافة — ${product.name} — مقاس ${size}`);
+  }, 150);
 }
 
 function quickAdd(id) {
@@ -578,20 +586,23 @@ function quickAdd(id) {
   if (!p) return;
   const firstSize = (p.sizes && p.sizes.length) ? p.sizes[0] : '42';
   addToCart(p, firstSize);
-  showToast(`✅ تم إضافة ${p.name} — مقاس ${firstSize}`);
 }
 
 function addToCart(p, size) {
   cart.push({ id: p.id, name: p.name, brand: p.brand||'', price: p.price||'', showPrice: p.showPrice, size, image: (p.images&&p.images[0])||'' });
   saveCart();
   updateCartCount();
-  showToast('✅ تم الإضافة للسلة');
+  showToast(`✅ تمت الإضافة للسلة — ${p.name} مقاس ${size}`);
 }
 
 function saveCart() { localStorage.setItem('xshoes_cart', JSON.stringify(cart)); }
 
 function updateCartCount() {
-  document.getElementById('cart-count').textContent = cart.length;
+  const el = document.getElementById('cart-count');
+  el.textContent = cart.length;
+  el.classList.remove('pop');
+  void el.offsetWidth;
+  el.classList.add('pop');
 }
 
 function openCart() {
