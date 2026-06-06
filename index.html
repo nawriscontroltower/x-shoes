@@ -595,7 +595,20 @@ function addToCart(p, size) {
   showToast(`✅ تمت الإضافة للسلة — ${p.name} مقاس ${size}`);
 }
 
-function saveCart() { localStorage.setItem('xshoes_cart', JSON.stringify(cart)); }
+function saveCart() {
+  try {
+    localStorage.setItem('xshoes_cart', JSON.stringify(cart));
+  } catch(e) {
+    // QuotaExceededError — free space then retry
+    try {
+      const keys = Object.keys(localStorage);
+      keys.forEach(k => { if (k !== 'xshoes_cart') localStorage.removeItem(k); });
+      localStorage.setItem('xshoes_cart', JSON.stringify(cart));
+    } catch(e2) {
+      console.warn('localStorage full — cart lives in memory only');
+    }
+  }
+}
 
 function updateCartCount() {
   const el = document.getElementById('cart-count');
